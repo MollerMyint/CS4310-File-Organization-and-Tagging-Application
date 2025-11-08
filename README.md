@@ -1,1 +1,1 @@
-# CS4310-File-Organization-and-Tagging-Application
+# CS4310 File System Simulation Application
