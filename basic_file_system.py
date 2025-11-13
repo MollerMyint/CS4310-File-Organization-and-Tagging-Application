@@ -1,12 +1,17 @@
 # Import statements
+from uuid import UUID
 from memory_system import MemorySystem
 from math import ceil
 
-class FileSystem:
+class BasicFileSystem:
+	'''	Class that simulates a basic file system by tracking ids of files and their corresponding blocks in memory.
+		Functions include storing, getting, and deleting files.
+	'''
+    
 	def __init__(self, block_size: int = 1024, memory_size: int = 1024):
 		'''	Initializes the file system given the block size and memory size.
 			Tracks free blocks with tuple ranges; initially all blocks are free from 0 (inclusive) to memory length (exclusive).
-			Tracks files stored in memory with a dictionary of file names and tuple ranges indicating where the file blocks are stored.
+			Tracks files stored in memory with a dictionary of file ids and tuple ranges indicating where the file blocks are stored.
 			:param block_size: block size with a default of 1024 bytes
 			:type block_size: int
 			:param memory_size: memory size with a default of 1024 blocks
@@ -14,18 +19,18 @@ class FileSystem:
 		'''
 		self._memory_system = MemorySystem(block_size, memory_size)
 		self._free_blocks = [(0, memory_size)]
-		self._file_table: dict[str, list[tuple[int, int]]] = {}
+		self._file_table: dict[UUID, list[tuple[int, int]]] = {}
 	
-	def store_file(self, file_data: bytes, file_name: str):
+	def store_data(self, file_data: bytes, file_id: UUID):
 		'''	Stores the given file data in memory and adds it to the file table.
 			:param file_data: the file data in bytes
 			:type file_data: int
-			:param file_name: the file name
-			:type file_name: str
+			:param file_id: the file id
+			:type file_id: UUID
 			:returns boolean True if successful, else False
 		'''
-		# Return false if a file of the same name is already in memory.
-		if self._file_table.get(file_name):
+		# Return false if a file of the same id is already in memory.
+		if self._file_table.get(file_id):
 			return False
 		num_blocks = ceil(len(file_data) / self._memory_system.block_size)
 		# Check if there is enough space to accomodate the file data.
@@ -54,28 +59,28 @@ class FileSystem:
 				blocks_used.append(free_block)
 				file_data = result
 				num_blocks = ceil(len(file_data) / self._memory_system.block_size)
-		self._file_table.update([(file_name, blocks_used)])
+		self._file_table.update([(file_id, blocks_used)])
 		self.__sort_free_blocks()
 		return True
    
-	def get_file(self, file_name: str):
-		'''	Gets the file data associated with the given file name.
-			:param file_name: the file name
-			:type file_data: str
+	def get_data(self, file_id: UUID):
+		'''	Gets the file data associated with the given file id.
+			:param file_id: the file id
+			:type file_id: UUID
 			:returns the file data if the file exists, else False
 		'''
-		file_blocks = self._file_table.get(file_name)
+		file_blocks = self._file_table.get(file_id)
 		if not file_blocks:
 			return False
 		return self.__get_blocks(file_blocks)
 		
-	def delete_file(self, file_name: str):
-		'''	Deletes the file data associated with the given file name.
-			:param file_name: the file name
-			:type file_data: str
+	def delete_data(self, file_id: UUID):
+		'''	Deletes the file data associated with the given file id.
+			:param file_id: the file id
+			:type file_data: UUID
 			:returns boolean True if successful, else False
 		'''
-		file_blocks = self._file_table.get(file_name)
+		file_blocks = self._file_table.get(file_id)
 		if not file_blocks:
 			return False
 		if not self.__empty_blocks(file_blocks):
@@ -93,7 +98,7 @@ class FileSystem:
 					break
 			else:
 				self._free_blocks.append(block_range)
-		self._file_table.pop(file_name)
+		self._file_table.pop(file_id)
 		self.__sort_free_blocks()
 		return True
 
@@ -135,34 +140,32 @@ class FileSystem:
   
   
 def __test():
-	fs = FileSystem(10, 10)
+	fs = BasicFileSystem(10, 10)
 	print(fs._file_table)
 	print(fs._free_blocks)
 	print(fs._memory_system._memory)
-	print(fs.store_file(bytes("This is a string.", "utf-8"), "File Name"))
+	print(fs.store_data(bytes("This is a string.", "utf-8"), UUID(int=0)))
 	print(fs._file_table)
 	print(fs._free_blocks)
 	print(fs._memory_system._memory)
-	print(fs.get_file("File Name"))
-	print(fs.store_file(bytes("This is a string.", "utf-8"), "File Name"))
+	print(fs.get_data(UUID(int=0)))
+	print(fs.store_data(bytes("This is a string.", "utf-8"), UUID(int=0)))
 	print(fs._file_table)
 	print(fs._free_blocks)
 	print(fs._memory_system._memory)
-	print(fs.store_file(bytes("This is another string that's pretty long and takes space.", "utf-8"), "File Name 2"))
+	print(fs.store_data(bytes("This is another string that's pretty long and takes space.", "utf-8"), UUID(int=1)))
 	print(fs._file_table)
 	print(fs._free_blocks)
 	print(fs._memory_system._memory)
-	print(fs.delete_file("File Name"))
+	print(fs.delete_data(UUID(int=0)))
 	print(fs._file_table)
 	print(fs._free_blocks)
 	print(fs._memory_system._memory)
-	print(fs.store_file(bytes("This is a string again.", "utf-8"), "File Name 3"))
+	print(fs.store_data(bytes("This is a string again.", "utf-8"), UUID(int=2)))
 	print(fs._file_table)
 	print(fs._free_blocks)
 	print(fs._memory_system._memory)
-	print(fs.delete_file("File Name 2"))
+	print(fs.delete_data(UUID(int=1)))
 	print(fs._file_table)
 	print(fs._free_blocks)
 	print(fs._memory_system._memory)
- 
-__test()

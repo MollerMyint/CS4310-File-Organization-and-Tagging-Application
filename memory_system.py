@@ -1,5 +1,6 @@
 class MemorySystem:
 	'''	Class that simulates a memory system with a fixed size list and block size.
+		Functions include filling, getting, and emptying memory blocks.
 	'''
 
 	def __init__(self, block_size: int = 1024, memory_size: int = 1024):
