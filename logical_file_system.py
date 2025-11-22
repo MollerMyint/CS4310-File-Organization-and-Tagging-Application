@@ -1,14 +1,9 @@
 # Import statements
 from dataclasses import dataclass
 from datetime import date, datetime
-from enum import Enum
 from basic_file_system import BasicFileSystem
 from uuid import UUID, uuid4
 from typing import Self
-
-class FileType(Enum):
-	TXT = 1
-	PNG = 2
 
 @dataclass
 class Directory:
@@ -19,7 +14,7 @@ class Directory:
 class FileControlBlock:
 	file_name: str
 	file_id: UUID
-	file_type: FileType
+	file_type: str
 	modified_date: date
 	size: int
 	parent_dir: Directory
@@ -57,9 +52,12 @@ class LogicalFileSystem:
 		if self.find_file(directory_path + "/" + file_name):
 			return False
 		# Determine the file type.
-		file_type = FileType.TXT
-		if file_path.endswith("png"):
-			file_type = FileType.PNG
+		
+		split = file_path.split(".")
+		if len(split) < 2:
+			file_type = "txt"
+		else:
+			file_type = split[-1]
 		# Store the file data.
 		with open(file_path, "rb") as file:
 			file_data = file.read()
@@ -80,7 +78,7 @@ class LogicalFileSystem:
 		file = self.find_file(file_path)
 		if not file:
 			return False
-		with open(f"output/{file_name}.{file.file_type.name.lower()}", "wb") as f:
+		with open(f"output/{file_name}.{file.file_type}", "wb") as f:
 			data = self._file_system.get_data(file.file_id)
 			if data:
 				f.write(data)

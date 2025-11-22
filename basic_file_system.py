@@ -84,7 +84,6 @@ class BasicFileSystem:
 		if not file_blocks:
 			return False
 		if not self.__empty_blocks(file_blocks):
-			# THROW ERROR HERE
 			return False
 		for block_range in file_blocks:
 			for free_block in self._free_blocks:

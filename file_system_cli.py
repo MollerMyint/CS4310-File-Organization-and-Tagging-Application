@@ -24,7 +24,11 @@ class CommandLineInterface():
 		running = True
 		# Main user interaction loop.
 		while (running):
-			user_input = split(input(f"{[dir.directory_name for dir in self._directory_path]} 🦆 "))
+			try:
+				user_input = split(input(f"{[dir.directory_name for dir in self._directory_path]} 🦆 "))
+			except ValueError as e:
+				print(f"Error: {e}")
+				user_input = ""
 			if user_input:
 				match user_input[0].lower():
 					case "help":
@@ -54,12 +58,12 @@ class CommandLineInterface():
 									print(f"{'Dir:':5} {dir.directory_name}")
 							case "-f":
 								for file in self._file_system.list_files(self.path_to_string()):
-									print(f"{'File:':5} {file.file_name}.{file.file_type.name} {file.modified_date} {file.size}")
+									print(f"{'File:':5} {file.file_name}.{file.file_type} {file.modified_date} {file.size}")
 							case "-fd" | "-df":
 								for dir in self._file_system.list_directories(self.path_to_string()):
 									print(f"{'Dir:':5} {dir.directory_name}")
 								for file in self._file_system.list_files(self.path_to_string()):
-									print(f"{'File:':5} {file.file_name}.{file.file_type.name} {file.modified_date} {file.size}")
+									print(f"{'File:':5} {file.file_name}.{file.file_type} {file.modified_date} {file.size}")
 							case _:
 								print("Error: Flags not recognized")
 					# Case for retrieving a file and putting it in the output directory.
@@ -127,5 +131,5 @@ class CommandLineInterface():
 						print(f"Error: Unknown command - '{user_input[0]}'")
 					
 if __name__ == "__main__":
-	cli = CommandLineInterface()
+	cli = CommandLineInterface(20000, 20000)
 	cli.start()
